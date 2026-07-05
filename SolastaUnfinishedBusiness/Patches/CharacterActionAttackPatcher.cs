@@ -46,6 +46,7 @@ public static class CharacterActionAttackPatcher
             var rulesetCharacter = actingCharacter.RulesetCharacter;
             var actionParams = __instance.ActionParams;
             var attackMode = actionParams.AttackMode;
+            var ammunitionEffectDescription = GetAmmunitionEffectDescription(rulesetCharacter, attackMode);
             var locationPositioningService = ServiceRepository.GetService<IGameLocationPositioningService>();
             var locationEntityFactoryService = ServiceRepository.GetService<IWorldLocationEntityFactoryService>();
             var implementationService = ServiceRepository.GetService<IRulesetImplementationService>();
@@ -521,6 +522,21 @@ public static class CharacterActionAttackPatcher
 
                     // Saving throw?
                     var hasBorrowedLuck = rulesetDefender.HasConditionOfTypeOrSubType(ConditionBorrowedLuck);
+                    var attackEffectDescription = attackMode.EffectDescription;
+                    EffectDescription originalEffectDescription = null;
+
+                    if (!attackEffectDescription.HasSavingThrow &&
+                        ammunitionEffectDescription?.HasSavingThrow == true)
+                    {
+                        originalEffectDescription = new EffectDescription();
+                        originalEffectDescription.Copy(attackEffectDescription);
+
+                        var effectForms = attackEffectDescription.EffectForms.ToArray();
+
+                        attackEffectDescription.Copy(ammunitionEffectDescription);
+                        attackEffectDescription.EffectForms.Clear();
+                        attackEffectDescription.EffectForms.AddRange(effectForms);
+                    }
 
                     // These bool information must be store as a class member, as it is passed to HandleFailedSavingThrow
                     __instance.RolledSaveThrow = attackMode.TryRollSavingThrow(
@@ -557,6 +573,11 @@ public static class CharacterActionAttackPatcher
                             savingThrowData,
                             hasBorrowedLuck,
                             attackMode.EffectDescription);
+                    }
+
+                    if (originalEffectDescription != null)
+                    {
+                        attackEffectDescription.Copy(originalEffectDescription);
                     }
 
                     // Check for resulting actions, if any of them is a CharacterSpendPower w/ a Motion effect form, don't wait for hit animation
@@ -952,6 +973,21 @@ public static class CharacterActionAttackPatcher
 
             yield return battleManager.HandleCharacterAttackOrMagicEffectFinishedLate(
                 __instance, actingCharacter);
+        }
+
+        private static EffectDescription GetAmmunitionEffectDescription(
+            RulesetCharacter rulesetCharacter,
+            RulesetAttackMode attackMode)
+        {
+            if (rulesetCharacter is not RulesetCharacterHero hero)
+            {
+                return null;
+            }
+
+            var ammunitionType = hero.GetAmmunitionType(attackMode);
+            var ammunitionSlot = hero.CharacterInventory.GetCurrentAmmunitionSlot(ammunitionType);
+
+            return ammunitionSlot?.EquipedItem?.ItemDefinition.AmmunitionDescription?.EffectDescription;
         }
     }
 }
