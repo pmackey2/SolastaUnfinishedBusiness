@@ -273,7 +273,7 @@ public static class CharacterActionAttackPatcher
                     if (targetCharacterTurnCoroutine.IsFinished)
                     {
                         targetCharacterTurnCoroutine.Reset();
-                        actingCharacterTurnCoroutine = null;
+                        targetCharacterTurnCoroutine = null;
                     }
                 }
 
@@ -841,7 +841,7 @@ public static class CharacterActionAttackPatcher
                     if (targetCharacterTurnCoroutine.IsFinished)
                     {
                         targetCharacterTurnCoroutine.Reset();
-                        actingCharacterTurnCoroutine = null;
+                        targetCharacterTurnCoroutine = null;
                     }
                 }
 
