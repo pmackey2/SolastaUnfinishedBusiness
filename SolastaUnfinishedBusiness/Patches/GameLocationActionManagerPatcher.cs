@@ -147,6 +147,27 @@ public static class GameLocationActionManagerPatcher
         }
     }
 
+    [HarmonyPatch(typeof(GameLocationActionManager), nameof(GameLocationActionManager.IsCharacterActing))]
+    [SuppressMessage("Minor Code Smell", "S101:Types should be named in PascalCase", Justification = "Patch")]
+    [UsedImplicitly]
+    public static class IsCharacterActing_Patch
+    {
+        [UsedImplicitly]
+        public static bool Prefix(
+            GameLocationActionManager __instance,
+            GameLocationCharacter character,
+            ref bool __result)
+        {
+            __result =
+                character != null &&
+                __instance.actionChainByCharacter != null &&
+                __instance.actionChainByCharacter.TryGetValue(character, out var actionChainSlot) &&
+                actionChainSlot != null;
+
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(GameLocationActionManager),
         nameof(GameLocationActionManager.ExecuteReactionRequestGroupAsync))]
     [SuppressMessage("Minor Code Smell", "S101:Types should be named in PascalCase", Justification = "Patch")]
