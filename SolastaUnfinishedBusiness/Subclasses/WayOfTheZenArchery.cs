@@ -128,7 +128,8 @@ public sealed class WayOfZenArchery : AbstractSubclass
 
         var powerHailOfArrows = FeatureDefinitionPowerBuilder
             .Create($"Power{Name}HailOfArrows")
-            .SetGuiPresentation(Category.Feature)
+            .SetGuiPresentation(Category.Feature,
+                Sprites.GetSprite($"Power{Name}HailOfArrows", Resources.PowerWayOfZenArcheryHailOfArrows, 256, 128))
             .SetUsesFixed(ActivationTime.Action, RechargeRate.KiPoints, 4, 4)
             .SetShowCasting(false)
             .SetEffectDescription(
