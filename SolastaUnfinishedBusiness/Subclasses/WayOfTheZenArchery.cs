@@ -134,7 +134,7 @@ public sealed class WayOfZenArchery : AbstractSubclass
             .SetEffectDescription(
                 EffectDescriptionBuilder
                     .Create()
-                    .SetTargetingData(Side.Enemy, RangeType.Self, 0, TargetType.Cone, 9)
+                    .SetTargetingData(Side.Enemy, RangeType.Distance, 24, TargetType.IndividualsUnique, 4)
                     .Build())
             .AddCustomSubFeatures(new PowerOrSpellFinishedByMeHailOfArrows())
             .AddToDB();
