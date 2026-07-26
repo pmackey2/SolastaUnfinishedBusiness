@@ -544,7 +544,8 @@ public static class CharacterActionAttackPatcher
                         attackEffectDescription.fixedSavingThrowDifficultyClass =
                             ammunitionEffectDescription.fixedSavingThrowDifficultyClass;
                         attackEffectDescription.advantageForEnemies = ammunitionEffectDescription.advantageForEnemies;
-                        attackEffectDescription.savingThrowAffinitiesBySense.SetRange(
+                        attackEffectDescription.savingThrowAffinitiesBySense.Clear();
+                        attackEffectDescription.savingThrowAffinitiesBySense.AddRange(
                             ammunitionEffectDescription.savingThrowAffinitiesBySense);
                         attackEffectDescription.savingThrowAffinitiesByFamily =
                             ammunitionEffectDescription.savingThrowAffinitiesByFamily;
