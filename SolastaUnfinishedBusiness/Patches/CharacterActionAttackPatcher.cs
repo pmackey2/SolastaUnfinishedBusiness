@@ -526,18 +526,28 @@ public static class CharacterActionAttackPatcher
                     EffectDescription originalEffectDescription = null;
 
                     // Poisoned ammunition keeps its saving throw metadata outside the generated attack mode.
-                    // Temporarily overlay that metadata so the attack pipeline rolls and applies the save.
+                    // Temporarily borrow only that save metadata so the attack pipeline rolls and applies it.
                     if (!attackEffectDescription.HasSavingThrow &&
                         ammunitionEffectDescription?.HasSavingThrow == true)
                     {
                         originalEffectDescription = new EffectDescription();
                         originalEffectDescription.Copy(attackEffectDescription);
 
-                        var effectForms = attackEffectDescription.EffectForms.ToArray();
-
-                        attackEffectDescription.Copy(ammunitionEffectDescription);
-                        attackEffectDescription.EffectForms.Clear();
-                        attackEffectDescription.EffectForms.AddRange(effectForms);
+                        attackEffectDescription.hasSavingThrow = ammunitionEffectDescription.hasSavingThrow;
+                        attackEffectDescription.disableSavingThrowOnAllies =
+                            ammunitionEffectDescription.disableSavingThrowOnAllies;
+                        attackEffectDescription.savingThrowAbility = ammunitionEffectDescription.savingThrowAbility;
+                        attackEffectDescription.difficultyClassComputation =
+                            ammunitionEffectDescription.difficultyClassComputation;
+                        attackEffectDescription.savingThrowDifficultyAbility =
+                            ammunitionEffectDescription.savingThrowDifficultyAbility;
+                        attackEffectDescription.fixedSavingThrowDifficultyClass =
+                            ammunitionEffectDescription.fixedSavingThrowDifficultyClass;
+                        attackEffectDescription.advantageForEnemies = ammunitionEffectDescription.advantageForEnemies;
+                        attackEffectDescription.savingThrowAffinitiesBySense.SetRange(
+                            ammunitionEffectDescription.savingThrowAffinitiesBySense);
+                        attackEffectDescription.savingThrowAffinitiesByFamily =
+                            ammunitionEffectDescription.savingThrowAffinitiesByFamily;
                     }
 
                     try
