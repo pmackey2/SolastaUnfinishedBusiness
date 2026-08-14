@@ -87,11 +87,12 @@ internal static partial class SpellBuilders
         const string NAME = "FaithfulHound";
 
         var sprite = Sprites.GetSprite(NAME, Resources.FaithfulHound, 128);
+        var portrait = Sprites.GetSprite($"{NAME}Portrait", Resources.FaithfulHoundPortrait, 512);
 
         var proxyFaithfulHound = EffectProxyDefinitionBuilder
             .Create(EffectProxyDefinitions.ProxyArcaneSword, $"Proxy{NAME}")
             .SetGuiPresentation(Category.Proxy, Gui.NoLocalization, sprite)
-            .SetPortrait(sprite)
+            .SetPortrait(portrait)
             .SetActionId(ExtraActionId.ProxyHoundWeapon)
             .SetAttackMethod(ProxyAttackMethod.CasterSpellAbility, DamageTypePiercing, DieType.D8, 4)
             .SetAdditionalFeatures(FeatureDefinitionSenses.SenseDarkvision, FeatureDefinitionSenses.SenseTruesight16)
