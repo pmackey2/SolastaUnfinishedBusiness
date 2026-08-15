@@ -89,19 +89,45 @@ internal static partial class SpellBuilders
         var sprite = Sprites.GetSprite(NAME, Resources.FaithfulHound, 128);
         var portrait = Sprites.GetSprite($"{NAME}Portrait", Resources.FaithfulHoundPortrait, 512);
 
+        var senseFaithfulHoundTruesight = FeatureDefinitionSenseBuilder
+            .Create($"Sense{NAME}Truesight")
+            .SetGuiPresentationNoContent(true)
+            .SetSense(SenseMode.Type.Truesight, 6)
+            .AddToDB();
+
+        var powerFaithfulHoundBite = FeatureDefinitionPowerBuilder
+            .Create($"Power{NAME}Bite")
+            .SetGuiPresentation(NAME, Category.Spell, hidden: true)
+            .SetUsesFixed(ActivationTime.NoCost)
+            .SetShowCasting(false)
+            .SetEffectDescription(
+                EffectDescriptionBuilder
+                    .Create()
+                    .SetTargetingData(Side.Enemy, RangeType.Distance, 60, TargetType.IndividualsUnique)
+                    .SetSavingThrowData(false, AttributeDefinitions.Dexterity, false,
+                        EffectDifficultyClassComputation.SpellCastingFeature)
+                    .SetEffectForms(
+                        EffectFormBuilder
+                            .Create()
+                            .HasSavingThrow(EffectSavingThrowType.Negates)
+                            .SetDamageForm(DamageTypeForce, 4, DieType.D8)
+                            .Build())
+                    .SetImpactEffectParameters(EldritchBlast)
+                    .Build())
+            .AddToDB();
+
         var proxyFaithfulHound = EffectProxyDefinitionBuilder
             .Create(EffectProxyDefinitions.ProxyArcaneSword, $"Proxy{NAME}")
             .SetGuiPresentation(Category.Proxy, Gui.NoLocalization, sprite)
             .SetPortrait(portrait)
-            .SetAttackMethod(ProxyAttackMethod.CasterSpellAbility, DamageTypePiercing, DieType.D8, 4)
+            .SetActionId(ExtraActionId.ProxyHoundWeapon)
             .SetAdditionalFeatures(
-                FeatureDefinitionSenses.SenseDarkvision,
-                FeatureDefinitionSenses.SenseTruesight16)
-            .SetCanMove(false, false)
+                FeatureDefinitionMoveModes.MoveModeMove6,
+                senseFaithfulHoundTruesight)
+            .SetCanMove(true, false)
             .AddToDB();
 
-        proxyFaithfulHound.actionId = Id.NoAction;
-        proxyFaithfulHound.freeActionId = Id.NoAction;
+        proxyFaithfulHound.canAttack = false;
         proxyFaithfulHound.firstAttackIsFree = false;
         proxyFaithfulHound.attackParticle = new AssetReference();
         proxyFaithfulHound.prefabReference = MonsterDefinitions.FeyWolf.MonsterPresentation.malePrefabReference;
@@ -113,7 +139,7 @@ internal static partial class SpellBuilders
             .AddToDB();
 
         conditionFaithfulHound.AddCustomSubFeatures(
-            new CharacterTurnStartListenerFaithfulHound(proxyFaithfulHound));
+            new CharacterTurnStartListenerFaithfulHound(proxyFaithfulHound, powerFaithfulHoundBite));
 
         var spell = SpellDefinitionBuilder
             .Create(NAME)
@@ -143,7 +169,9 @@ internal static partial class SpellBuilders
         return spell;
     }
 
-    private sealed class CharacterTurnStartListenerFaithfulHound(EffectProxyDefinition proxyDefinition)
+    private sealed class CharacterTurnStartListenerFaithfulHound(
+        EffectProxyDefinition proxyDefinition,
+        FeatureDefinitionPower powerFaithfulHoundBite)
         : ICharacterTurnStartListener
     {
         public void OnCharacterTurnStarted(GameLocationCharacter locationCharacter)
@@ -153,7 +181,7 @@ internal static partial class SpellBuilders
                 return;
             }
 
-            var battleService = ServiceRepository.GetService<IGameLocationBattleService>();
+            var usablePower = PowerProvider.Get(powerFaithfulHoundBite, locationCharacter.RulesetCharacter);
 
             foreach (var rulesetProxy in locationCharacter.RulesetCharacter.ControlledEffectProxies
                          .Where(x => x.EffectProxyDefinition == proxyDefinition))
@@ -169,15 +197,7 @@ internal static partial class SpellBuilders
                              .GetContenders(hound, hasToPerceiveTarget: true, withinRange: 1)
                              .Where(x => x.RulesetCharacter is not RulesetCharacterEffectProxy))
                 {
-                    var (attackMode, actionModifier) = hound.GetFirstMeleeModeThatCanAttack(
-                        target, battleService, allowUnarmed: true);
-
-                    if (attackMode == null)
-                    {
-                        continue;
-                    }
-
-                    hound.MyExecuteActionAttack(Id.AttackFree, target, attackMode, actionModifier);
+                    locationCharacter.MyExecuteActionSpendPower(usablePower, target);
                     break;
                 }
             }

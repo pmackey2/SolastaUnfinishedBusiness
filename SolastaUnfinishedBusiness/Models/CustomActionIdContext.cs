@@ -89,6 +89,7 @@ public static class CustomActionIdContext
     [
         (Id)ExtraActionId.ProxyDarkness,
         (Id)ExtraActionId.ProxyDawn,
+        (Id)ExtraActionId.ProxyHoundWeapon,
         (Id)ExtraActionId.ProxyPactWeapon,
         (Id)ExtraActionId.ProxyPetalStorm
     ];
@@ -136,6 +137,12 @@ public static class CustomActionIdContext
         ActionDefinitionBuilder
             .Create(ProxyFlamingSphere, "ActionProxyPetalStorm")
             .SetActionId(ExtraActionId.ProxyPetalStorm)
+            .AddToDB();
+
+        ActionDefinitionBuilder
+            .Create(ProxyFlamingSphere, "ActionProxyFaithfulHoundMove")
+            .SetActionId(ExtraActionId.ProxyHoundWeapon)
+            .SetActionType(ActionType.Main)
             .AddToDB();
 
         ActionDefinitionBuilder
