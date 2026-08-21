@@ -67,6 +67,13 @@ public static class ReactionRequestCastSpellPatcher
             var selected =
                 MulticlassGameUi.AddAvailableSubLevels(optionsAvailability, hero, repertoire, spellLevel);
 
+            if (Level20Context.WizardSpellMastery.IsMasteredSpell(
+                    repertoire, rulesetEffectSpell.SpellDefinition))
+            {
+                optionsAvailability[spellLevel] = true;
+                selected = Array.IndexOf([.. optionsAvailability.Keys], spellLevel);
+            }
+
             if (selected >= 0)
             {
                 __instance.SelectSubOption(selected);
