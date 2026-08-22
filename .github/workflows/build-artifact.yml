@@ -1,6 +1,9 @@
 name: Build artifact
 
 on:
+  push:
+    branches:
+      - 'fix/**'
   workflow_dispatch:
 
 env:
