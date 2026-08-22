@@ -169,6 +169,19 @@ public static class CharacterReactionItemPatcher
                 case ReactionRequestSelectSmiteSlot:
                     instance.BindSmiteSlot(spellRepertoire, slotLevel, text, interactable, subitemSelected);
                     break;
+                case ReactionRequestCastSpell
+                    when slotLevel == 0 &&
+                         reactionRequest.ReactionParams.RulesetEffect is RulesetEffectSpell spellEffect &&
+                         Level20Context.WizardSpellMastery.IsMasteredSpell(
+                             spellEffect.SpellRepertoire, spellEffect.SpellDefinition):
+                    instance.BindFreeSpellSlot(
+                        spellRepertoire,
+                        slotLevel,
+                        text,
+                        interactable,
+                        subitemSelected,
+                        "Feature/&FeatureWizardSpellMasteryDescription");
+                    break;
                 default:
                     instance.Bind(spellRepertoire, slotLevel, text, interactable, subitemSelected);
                     break;

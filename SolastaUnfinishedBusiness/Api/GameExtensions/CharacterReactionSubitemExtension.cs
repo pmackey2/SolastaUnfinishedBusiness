@@ -169,6 +169,24 @@ internal static class CharacterReactionSubitemExtension
         bool interactable,
         CharacterReactionSubitem.SubitemSelectedHandler subitemSelected)
     {
+        instance.BindFreeSpellSlot(
+            spellRepertoire,
+            slotLevel,
+            text,
+            interactable,
+            subitemSelected,
+            "Reaction/&ReactionDivineSmite2024SlotFreeDescription");
+    }
+
+    internal static void BindFreeSpellSlot(
+        [NotNull] this CharacterReactionSubitem instance,
+        RulesetSpellRepertoire spellRepertoire,
+        int slotLevel,
+        string text,
+        bool interactable,
+        CharacterReactionSubitem.SubitemSelectedHandler subitemSelected,
+        string tooltipContent)
+    {
         if (slotLevel == 0)
         {
             text = "Action/&ActionTypeFreeOnceTitle";
@@ -182,7 +200,7 @@ internal static class CharacterReactionSubitemExtension
             {
                 tooltip.Disabled = false;
                 tooltip.TooltipClass = GuiManager.DefaultTooltipClass;
-                tooltip.Content = "Reaction/&ReactionDivineSmite2024SlotFreeDescription";
+                tooltip.Content = tooltipContent;
                 tooltip.Context = null;
                 tooltip.DataProvider = null;
             }

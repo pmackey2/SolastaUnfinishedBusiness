@@ -70,8 +70,19 @@ public static class ReactionRequestCastSpellPatcher
             if (Level20Context.WizardSpellMastery.IsMasteredSpell(
                     repertoire, rulesetEffectSpell.SpellDefinition))
             {
-                optionsAvailability[spellLevel] = true;
-                selected = Array.IndexOf([.. optionsAvailability.Keys], spellLevel);
+                var upcastOptions = optionsAvailability
+                    .Where(x => x.Key > spellLevel)
+                    .ToArray();
+
+                optionsAvailability.Clear();
+                optionsAvailability.Add(0, true);
+
+                foreach (var option in upcastOptions)
+                {
+                    optionsAvailability.Add(option.Key, option.Value);
+                }
+
+                selected = 0;
             }
 
             if (selected >= 0)
