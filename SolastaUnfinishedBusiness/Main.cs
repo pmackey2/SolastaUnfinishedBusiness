@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -80,19 +79,10 @@ internal static class Main
         var runtimeVersion = typeof(UnityModManager)
             .GetTypeInfo()
             .Assembly
-            .GetCustomAttribute<AssemblyFileVersionAttribute>();
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()
+            ?.Version ?? "unknown";
 
-        var unityModManagerVersion = runtimeVersion.Version.Split('.');
-
-        if (unityModManagerVersion.Length > 2 &&
-            int.TryParse(unityModManagerVersion[1], NumberStyles.Integer, CultureInfo.CurrentCulture, out var minor) &&
-            int.TryParse(unityModManagerVersion[2], NumberStyles.Integer, CultureInfo.CurrentCulture, out var rev) &&
-            ((minor == 27 && rev > 10) || minor > 27))
-        {
-            Info($"Unity mod manager version {runtimeVersion.Version} is not compatible with UB. aborting.");
-
-            return false;
-        }
+        Info($"Unity mod manager version {runtimeVersion}.");
 
         EnsureFolderExists(SettingsFolder);
         PortraitsContext.EnsureFolderExists();
