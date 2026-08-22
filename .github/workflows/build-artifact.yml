@@ -25,15 +25,9 @@ jobs:
         run: dotnet clean SolastaUnfinishedBusiness.sln
       - name: Build
         run: dotnet build SolastaUnfinishedBusiness.sln --no-restore -c "Release Workflow"
-      - name: Zip files
-        uses: vimtor/action-zip@v1.2
-        with:
-          files: ./SolastaFiles/Mods/
-          recursive: true
-          dest: SolastaUnfinishedBusiness.zip
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: SolastaUnfinishedBusiness
-          path: SolastaUnfinishedBusiness.zip
+          path: ./SolastaFiles/Mods/
           if-no-files-found: error
