@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 using SolastaUnfinishedBusiness.Api.GameExtensions;
 using SolastaUnfinishedBusiness.Api.Helpers;
 using SolastaUnfinishedBusiness.Models;
+using UnityEngine;
+using UnityEngine.UI;
+using static SolastaUnfinishedBusiness.Models.Level20Context;
 
 namespace SolastaUnfinishedBusiness.Patches;
 
@@ -18,6 +21,8 @@ public static class SpellActivationBoxPatcher
     [UsedImplicitly]
     public static class BindSpell_Patch
     {
+        private const string SpellMasteryBadgeName = "UBSpellMasteryBadge";
+
         private static bool UniqueLevelSlots(
             FeatureDefinitionCastSpell featureDefinitionCastSpell,
             RulesetCharacter character)
@@ -86,6 +91,66 @@ public static class SpellActivationBoxPatcher
                 .ReplaceCalls(uniqueLevelSlotsMethod, "SpellActivationBox.BindSpell.UniqueLevelSlots",
                     new CodeInstruction(OpCodes.Ldarg_1),
                     new CodeInstruction(OpCodes.Call, myUniqueLevelSlotsMethod));
+        }
+
+        [UsedImplicitly]
+        public static void Postfix(
+            SpellActivationBox __instance,
+            RulesetSpellRepertoire spellRepertoire,
+            SpellDefinition spellDefinition)
+        {
+            var showBadge = WizardSpellMastery.IsMasteredSpell(spellRepertoire, spellDefinition);
+            var badge = __instance.transform.Find(SpellMasteryBadgeName) as RectTransform;
+
+            if (badge == null && showBadge)
+            {
+                badge = BuildSpellMasteryBadge(__instance);
+            }
+
+            if (badge != null)
+            {
+                badge.gameObject.SetActive(showBadge);
+                badge.SetAsLastSibling();
+            }
+        }
+
+        private static RectTransform BuildSpellMasteryBadge(SpellActivationBox spellActivationBox)
+        {
+            var badgeObject = new GameObject(SpellMasteryBadgeName, typeof(RectTransform), typeof(Image));
+            var badge = badgeObject.GetComponent<RectTransform>();
+
+            badge.SetParent(spellActivationBox.transform, false);
+            badge.anchorMin = Vector2.one;
+            badge.anchorMax = Vector2.one;
+            badge.pivot = Vector2.one;
+            badge.anchoredPosition = new Vector2(-2, -2);
+            badge.sizeDelta = new Vector2(22, 22);
+
+            var background = badgeObject.GetComponent<Image>();
+            background.sprite = spellActivationBox.background.sprite;
+            background.type = Image.Type.Sliced;
+            background.color = new Color(0.20f, 0.10f, 0.32f, 0.96f);
+            background.raycastTarget = false;
+
+            var labelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            var labelTransform = labelObject.GetComponent<RectTransform>();
+
+            labelTransform.SetParent(badge, false);
+            labelTransform.anchorMin = Vector2.zero;
+            labelTransform.anchorMax = Vector2.one;
+            labelTransform.offsetMin = Vector2.zero;
+            labelTransform.offsetMax = Vector2.zero;
+
+            var label = labelObject.GetComponent<Text>();
+            label.text = "M";
+            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            label.fontSize = 16;
+            label.fontStyle = FontStyle.Bold;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.color = new Color(1.00f, 0.84f, 0.35f);
+            label.raycastTarget = false;
+
+            return badge;
         }
     }
 

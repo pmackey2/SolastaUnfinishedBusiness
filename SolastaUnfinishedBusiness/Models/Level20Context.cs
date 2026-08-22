@@ -697,9 +697,7 @@ internal static class Level20Context
 
         internal static bool ShouldConsumeSlot(RulesetCharacter caster, RulesetEffectSpell activeSpell)
         {
-            if (!activeSpell.SpellRepertoire.ExtraSpellsByTag.TryGetValue(Mastery,
-                    out var signaturePreparedSpells) ||
-                !signaturePreparedSpells.Contains(activeSpell.SpellDefinition) ||
+            if (!IsMasteredSpell(activeSpell.SpellRepertoire, activeSpell.SpellDefinition) ||
                 activeSpell.SlotLevel != activeSpell.SpellDefinition.SpellLevel)
             {
                 return true;
@@ -708,6 +706,12 @@ internal static class Level20Context
             caster.LogCharacterUsedFeature(FeatureSpellMastery);
 
             return false;
+        }
+
+        internal static bool IsMasteredSpell(RulesetSpellRepertoire repertoire, SpellDefinition spell)
+        {
+            return repertoire.ExtraSpellsByTag.TryGetValue(Mastery, out var masteredSpells) &&
+                   masteredSpells.Contains(spell);
         }
 
         internal static FeatureDefinition BuildWizardSpellMastery()
