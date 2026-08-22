@@ -25,6 +25,7 @@ internal static class UpdateContext
     private static InfoJson Info { get; set; }
     private static string BaseURL { get; set; }
     private static string VersionURL { get; set; }
+    private static string ReleaseTagPrefix { get; set; }
     private static string InstalledVersion { get; set; }
     private static string LatestVersion { get; set; }
     private static string PreviousVersion { get; set; }
@@ -40,6 +41,7 @@ internal static class UpdateContext
 
         BaseURL = Info.Repository + "/releases/download";
         VersionURL = Info.VersionURL;
+        ReleaseTagPrefix = Info.ReleaseTagPrefix ?? "";
         InstalledVersion = Info.Version;
         PreviousVersion = GetPreviousVersion();
 
@@ -125,7 +127,7 @@ internal static class UpdateContext
         var zipFile = "SolastaUnfinishedBusiness.zip";
         var fullZipFile = Path.Combine(Main.ModFolder, zipFile);
         var fullZipFolder = Path.Combine(Main.ModFolder, TempFolder);
-        var baseUrlByVersion = BaseURL.Replace("download", $"download/{version}");
+        var baseUrlByVersion = $"{BaseURL}/{ReleaseTagPrefix}{version}";
         var url = new Uri($"{baseUrlByVersion}/{zipFile}");
 
         try

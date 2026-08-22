@@ -1,10 +1,12 @@
 # Custom Version Notice
 
-This repository contains a custom version of **Solasta Unfinished Business**, based on version `1.5.97.127`. It includes the following changes made for this build:
+This repository contains **Patrick's custom version** of Solasta Unfinished Business, version `1.5.97.9001`, based on upstream version `1.5.97.127`. Custom releases use `pmackey-custom-*` tags so they cannot be confused with upstream builds. It includes the following changes made for this build:
 
 * **Way of Zen Archery — Hail of Arrows:** targets up to four visible enemies within 120 feet instead of using a cone, with a new icon and updated description.
 * **Mordenkainen's Faithful Hound:** new spell and portrait artwork, automatic attacks at the start of the caster's turn, 2024-style Dexterity save and Force damage, 30-foot Truesight, and the ability to move the hound using a main action.
 * **Fighter — Action Surge:** the level-17 improvement now appears as one Action Surge button with two uses, prevents both uses being spent in the same turn, and migrates existing characters from the old separate-power implementation.
+* **Poisoned ammunition:** ammunition-delivered poisons now use their own saving-throw metadata correctly, including their save DC and affinities, without corrupting the generated attack effect or causing saving-throw crashes.
+* **Reaction attack stability:** corrected reaction action-chain cleanup so reaction attacks do not corrupt combat action state or trigger the associated crash.
 * **Wizard — Spell Mastery:** corrected free casting for mastered spells affected by effect-level bonuses, including Shock Arcanist Magic Missile.
 * **Spell Mastery interface:** mastered spells have a subtle `M` badge in the casting list. Reaction spells such as Shield offer a properly sized **Free** choice at their base level, show only paid upcast levels, and record Spell Mastery use in the tactical log.
 

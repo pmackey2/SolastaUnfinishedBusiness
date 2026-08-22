@@ -15,5 +15,6 @@ public class InfoJson
     public string HomePage { get; set; }
     public string Repository { get; set; }
     public string VersionURL { get; set; }
+    public string ReleaseTagPrefix { get; set; }
     public string Changelog { get; set; }
 }
