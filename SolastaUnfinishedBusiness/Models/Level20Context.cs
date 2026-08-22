@@ -16,8 +16,10 @@ using SolastaUnfinishedBusiness.Builders.Features;
 using SolastaUnfinishedBusiness.CustomUI;
 using SolastaUnfinishedBusiness.Interfaces;
 using SolastaUnfinishedBusiness.Subclasses;
+using SolastaUnfinishedBusiness.Validators;
 using static RuleDefinitions;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.CharacterClassDefinitions;
+using static SolastaUnfinishedBusiness.Api.DatabaseHelper.ConditionDefinitions;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionAdditionalDamages;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionAttributeModifiers;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionCastSpells;
@@ -374,14 +376,26 @@ internal static class Level20Context
 
     private static void FighterLoad()
     {
-        var powerFighterActionSurge2 = FeatureDefinitionPowerBuilder
+        var actionSurgeOncePerTurn = ValidatorsValidatePowerUse.HasNoneOfConditions(ConditionSurged.Name);
+
+        PowerFighterActionSurge.AddCustomSubFeatures(actionSurgeOncePerTurn);
+
+        // Keep the old definition registered so existing saves can still deserialize it,
+        // but no longer grant, show, or treat it as an override of the original power.
+        FeatureDefinitionPowerBuilder
             .Create(PowerFighterActionSurge, "PowerFighterActionSurge2")
             .SetUsesFixed(ActivationTime.NoCost, RechargeRate.ShortRest, 1, 2)
-            .SetOverriddenPower(PowerFighterActionSurge)
+            .AddCustomSubFeatures(actionSurgeOncePerTurn, ModifyPowerVisibility.Hidden)
+            .AddToDB();
+
+        var powerUseModifierFighterActionSurge = FeatureDefinitionPowerUseModifierBuilder
+            .Create("PowerUseModifierFighterActionSurge")
+            .SetGuiPresentation(PowerFighterActionSurge.GuiPresentation)
+            .SetFixedValue(PowerFighterActionSurge, 1)
             .AddToDB();
 
         Fighter.FeatureUnlocks.AddRange(
-            new FeatureUnlockByLevel(powerFighterActionSurge2, 17),
+            new FeatureUnlockByLevel(powerUseModifierFighterActionSurge, 17),
             new FeatureUnlockByLevel(AttributeModifierFighterIndomitableAdd1, 17),
             new FeatureUnlockByLevel(FeatureSetAbilityScoreChoice, 19),
             new FeatureUnlockByLevel(AttributeModifierFighterExtraAttack, 20)
