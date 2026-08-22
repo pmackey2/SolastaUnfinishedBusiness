@@ -375,8 +375,14 @@ internal static class Level20Context
 
     private static void FighterLoad()
     {
-        var actionSurgeOncePerTurn = ValidatorsValidatePowerUse.HasNoneOfConditions(
-            DatabaseHelper.ConditionDefinitions.ConditionSurged.Name);
+        // The engine condition helper can miss ConditionSurged even while the condition is
+        // present in ConditionsByCategory (and persisted in the save). Inspect the complete
+        // active-condition collection so a fighter cannot spend both uses in the same turn.
+        var actionSurgeOncePerTurn = new ValidatorsValidatePowerUse(character =>
+            character.ConditionsByCategory
+                .SelectMany(category => category.Value)
+                .All(condition => condition.ConditionDefinition !=
+                                  DatabaseHelper.ConditionDefinitions.ConditionSurged));
 
         PowerFighterActionSurge.AddCustomSubFeatures(
             HasModifiedUses.Marker,
