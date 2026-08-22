@@ -2,6 +2,8 @@
 
 This repository contains **Patrick's custom version** of Solasta Unfinished Business, version `1.5.97.9001`, based on upstream version `1.5.97.127`. Custom releases use `pmackey-custom-*` tags so they cannot be confused with upstream builds. It includes the following changes made for this build:
 
+This build deliberately retains the original `SolastaUnfinishedBusiness` mod ID and folder name, so it can be installed directly over upstream `1.5.97.127` as a replacement rather than appearing as a second mod.
+
 * **Way of Zen Archery — Hail of Arrows:** targets up to four visible enemies within 120 feet instead of using a cone, with a new icon and updated description.
 * **Mordenkainen's Faithful Hound:** new spell and portrait artwork, automatic attacks at the start of the caster's turn, 2024-style Dexterity save and Force damage, 30-foot Truesight, and the ability to move the hound using a main action.
 * **Fighter — Action Surge:** the level-17 improvement now appears as one Action Surge button with two uses, prevents both uses being spent in the same turn, and migrates existing characters from the old separate-power implementation.
