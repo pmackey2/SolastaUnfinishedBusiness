@@ -700,7 +700,7 @@ internal static class Level20Context
             if (!activeSpell.SpellRepertoire.ExtraSpellsByTag.TryGetValue(Mastery,
                     out var signaturePreparedSpells) ||
                 !signaturePreparedSpells.Contains(activeSpell.SpellDefinition) ||
-                activeSpell.EffectLevel != activeSpell.SpellDefinition.SpellLevel)
+                activeSpell.SlotLevel != activeSpell.SpellDefinition.SpellLevel)
             {
                 return true;
             }
@@ -835,7 +835,7 @@ internal static class Level20Context
 
         internal static bool ShouldConsumeSlot(RulesetCharacter caster, RulesetEffectSpell activeSpell)
         {
-            if (activeSpell.EffectLevel != activeSpell.SpellDefinition.SpellLevel)
+            if (activeSpell.SlotLevel != activeSpell.SpellDefinition.SpellLevel)
             {
                 return true;
             }
