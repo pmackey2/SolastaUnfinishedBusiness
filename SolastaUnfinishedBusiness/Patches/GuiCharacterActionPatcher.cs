@@ -103,6 +103,21 @@ public static class GuiCharacterActionPatcher
             //PATCH: Get custom error message for CastQuickened action
             CustomActionIdContext.CheckQuickenedStatus(__instance, actionStatus, guiTooltip, ref currentFailureString);
 
+            // Explain the level 17 Action Surge restriction instead of showing the
+            // generic "cannot perform this kind of action" failure.
+            if (__instance.ActionId == ActionDefinitions.Id.ActionSurge &&
+                actionStatus == ActionDefinitions.ActionStatus.CannotPerform &&
+                !Level20Context.CanUseActionSurge(__instance.ActingCharacter.RulesetCharacter) &&
+                !string.IsNullOrEmpty(currentFailureString))
+            {
+                guiTooltip.Content = guiTooltip.Content.Substring(
+                    0, guiTooltip.Content.Length - currentFailureString.Length);
+                currentFailureString = "\n" + Gui.Colorize(
+                    Gui.Format("Failure/&FailureFlagActionSurgeOncePerTurn"),
+                    Gui.ColorFailure);
+                guiTooltip.Content += currentFailureString;
+            }
+
             //PATCH: support for Nick weapon Mastery - make action button tooltip have weapon info
             if (_wasNickAttack)
             {
