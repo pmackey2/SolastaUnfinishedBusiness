@@ -747,6 +747,7 @@ internal static class Level20Context
         internal static bool ShouldConsumeSlot(RulesetCharacter caster, RulesetEffectSpell activeSpell)
         {
             if (!IsMasteredSpell(activeSpell.SpellRepertoire, activeSpell.SpellDefinition) ||
+                activeSpell.SlotLevel != 0 &&
                 activeSpell.SlotLevel != activeSpell.SpellDefinition.SpellLevel)
             {
                 return true;
