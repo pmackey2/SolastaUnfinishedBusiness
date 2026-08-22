@@ -8,6 +8,8 @@ This repository contains a custom version of **Solasta Unfinished Business**, ba
 * **Wizard — Spell Mastery:** corrected free casting for mastered spells affected by effect-level bonuses, including Shock Arcanist Magic Missile.
 * **Spell Mastery interface:** mastered spells have a subtle `M` badge in the casting list. Reaction spells such as Shield offer a properly sized **Free** choice at their base level, show only paid upcast levels, and record Spell Mastery use in the tactical log.
 
+**Artwork note:** the custom Hail of Arrows and Faithful Hound images used by this version were generated with AI.
+
 ---
 
 # Solasta Unfinished Business
