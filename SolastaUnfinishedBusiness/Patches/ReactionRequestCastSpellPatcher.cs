@@ -78,7 +78,7 @@ public static class ReactionRequestCastSpellPatcher
                 optionsAvailability,
                 hero,
                 repertoire,
-                spellLevel);
+                hasMasteryUse ? spellLevel + 1 : spellLevel);
 
             if (hasMasteryUse)
             {
@@ -113,7 +113,19 @@ public static class ReactionRequestCastSpellPatcher
                 return true;
             }
 
-            spellEffect.SlotLevel = __instance.SubOptionsAvailability.Keys.ToArray()[option];
+            var selectedSlotLevel = __instance.SubOptionsAvailability.Keys.ToArray()[option];
+
+            // Zero is only the UI key for the Free row. Cast the spell at its real
+            // base level so effect advancement and spell accounting remain correct.
+            if (selectedSlotLevel == 0 &&
+                WizardSpellMastery.IsMasteredSpell(
+                    spellEffect.SpellRepertoire,
+                    spellEffect.SpellDefinition))
+            {
+                selectedSlotLevel = spellEffect.SpellDefinition.SpellLevel;
+            }
+
+            spellEffect.SlotLevel = selectedSlotLevel;
             return false;
         }
     }
@@ -140,7 +152,18 @@ public static class ReactionRequestCastSpellPatcher
                 return true;
             }
 
-            __result = Array.IndexOf([.. __instance.SubOptionsAvailability.Keys], spellEffect.SlotLevel);
+            var selectedSlotLevel = spellEffect.SlotLevel;
+
+            if (__instance.SubOptionsAvailability.ContainsKey(0) &&
+                selectedSlotLevel == spellEffect.SpellDefinition.SpellLevel &&
+                WizardSpellMastery.IsMasteredSpell(
+                    spellEffect.SpellRepertoire,
+                    spellEffect.SpellDefinition))
+            {
+                selectedSlotLevel = 0;
+            }
+
+            __result = Array.IndexOf([.. __instance.SubOptionsAvailability.Keys], selectedSlotLevel);
 
             return false;
         }
