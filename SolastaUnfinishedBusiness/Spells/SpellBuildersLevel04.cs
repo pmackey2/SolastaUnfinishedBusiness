@@ -87,19 +87,59 @@ internal static partial class SpellBuilders
         const string NAME = "FaithfulHound";
 
         var sprite = Sprites.GetSprite(NAME, Resources.FaithfulHound, 128);
+        var portrait = Sprites.GetSprite($"{NAME}Portrait", Resources.FaithfulHoundPortrait, 512);
+
+        var senseFaithfulHoundTruesight = FeatureDefinitionSenseBuilder
+            .Create($"Sense{NAME}Truesight")
+            .SetGuiPresentationNoContent(true)
+            .SetSense(SenseMode.Type.Truesight, 6)
+            .AddToDB();
+
+        var powerFaithfulHoundBite = FeatureDefinitionPowerBuilder
+            .Create($"Power{NAME}Bite")
+            .SetGuiPresentation(NAME, Category.Spell, hidden: true)
+            .SetUsesFixed(ActivationTime.NoCost)
+            .SetShowCasting(false)
+            .SetEffectDescription(
+                EffectDescriptionBuilder
+                    .Create()
+                    .SetTargetingData(Side.Enemy, RangeType.Distance, 60, TargetType.IndividualsUnique)
+                    .SetSavingThrowData(false, AttributeDefinitions.Dexterity, false,
+                        EffectDifficultyClassComputation.SpellCastingFeature)
+                    .SetEffectForms(
+                        EffectFormBuilder
+                            .Create()
+                            .HasSavingThrow(EffectSavingThrowType.Negates)
+                            .SetDamageForm(DamageTypeForce, 4, DieType.D8)
+                            .Build())
+                    .SetImpactEffectParameters(EldritchBlast)
+                    .Build())
+            .AddToDB();
 
         var proxyFaithfulHound = EffectProxyDefinitionBuilder
             .Create(EffectProxyDefinitions.ProxyArcaneSword, $"Proxy{NAME}")
             .SetGuiPresentation(Category.Proxy, Gui.NoLocalization, sprite)
-            .SetPortrait(sprite)
+            .SetPortrait(portrait)
             .SetActionId(ExtraActionId.ProxyHoundWeapon)
-            .SetAttackMethod(ProxyAttackMethod.CasterSpellAbility, DamageTypePiercing, DieType.D8, 4)
-            .SetAdditionalFeatures(FeatureDefinitionSenses.SenseDarkvision, FeatureDefinitionSenses.SenseTruesight16)
-            .SetCanMove(false, false)
+            .SetAdditionalFeatures(
+                FeatureDefinitionMoveModes.MoveModeMove6,
+                senseFaithfulHoundTruesight)
+            .SetCanMove(true, false)
             .AddToDB();
 
+        proxyFaithfulHound.canAttack = false;
+        proxyFaithfulHound.firstAttackIsFree = false;
         proxyFaithfulHound.attackParticle = new AssetReference();
         proxyFaithfulHound.prefabReference = MonsterDefinitions.FeyWolf.MonsterPresentation.malePrefabReference;
+
+        var conditionFaithfulHound = ConditionDefinitionBuilder
+            .Create($"Condition{NAME}")
+            .SetGuiPresentationNoContent(true)
+            .SetSilent(Silent.WhenAddedOrRemoved)
+            .AddToDB();
+
+        conditionFaithfulHound.AddCustomSubFeatures(
+            new CharacterTurnStartListenerFaithfulHound(proxyFaithfulHound, powerFaithfulHoundBite));
 
         var spell = SpellDefinitionBuilder
             .Create(NAME)
@@ -120,12 +160,48 @@ internal static partial class SpellBuilders
                         EffectFormBuilder
                             .Create()
                             .SetSummonEffectProxyForm(proxyFaithfulHound)
-                            .Build())
+                            .Build(),
+                        EffectFormBuilder.ConditionForm(conditionFaithfulHound, applyToSelf: true))
                     .SetParticleEffectParameters(DispelMagic)
                     .Build())
             .AddToDB();
 
         return spell;
+    }
+
+    private sealed class CharacterTurnStartListenerFaithfulHound(
+        EffectProxyDefinition proxyDefinition,
+        FeatureDefinitionPower powerFaithfulHoundBite)
+        : ICharacterTurnStartListener
+    {
+        public void OnCharacterTurnStarted(GameLocationCharacter locationCharacter)
+        {
+            if (Gui.Battle == null)
+            {
+                return;
+            }
+
+            var usablePower = PowerProvider.Get(powerFaithfulHoundBite, locationCharacter.RulesetCharacter);
+
+            foreach (var rulesetProxy in locationCharacter.RulesetCharacter.ControlledEffectProxies
+                         .Where(x => x.EffectProxyDefinition == proxyDefinition))
+            {
+                var hound = GameLocationCharacter.GetFromActor(rulesetProxy);
+
+                if (hound == null)
+                {
+                    continue;
+                }
+
+                foreach (var target in Gui.Battle
+                             .GetContenders(hound, hasToPerceiveTarget: true, withinRange: 1)
+                             .Where(x => x.RulesetCharacter is not RulesetCharacterEffectProxy))
+                {
+                    locationCharacter.MyExecuteActionSpendPower(usablePower, target);
+                    break;
+                }
+            }
+        }
     }
 
     #endregion

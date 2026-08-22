@@ -3894,7 +3894,7 @@ While you are unarmored, you gain +2 bonus to all attack and damage rolls with b
 
 * Hail of Arrows
 
-You can use your action and spend 4 ki to fire a barrage of arrows. You make one bow attack against each enemy creature you can see in a 45-foot-cone.
+You can use your action and spend 4 ki to fire a barrage of arrows. Choose up to four enemy creatures you can see within 120 feet; you make one bow attack against each target.
 
 
 

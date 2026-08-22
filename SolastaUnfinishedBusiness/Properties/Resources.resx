@@ -337,6 +337,11 @@
       PublicKeyToken=b77a5c561934e089
     </value>
   </data>
+  <data name="FaithfulHoundPortrait" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>../Resources/Spells/FaithfulHoundPortrait.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral,
+      PublicKeyToken=b77a5c561934e089
+    </value>
+  </data>
   <data name="WitherAndBloom" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>../Resources/Spells/WitherAndBloom.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral,
       PublicKeyToken=b77a5c561934e089
@@ -710,6 +715,11 @@
   </data>
   <data name="PowerStepOfTheWindNoCost" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>../Resources/Powers/PowerStepOfTheWindNoCost.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral,
+      PublicKeyToken=b77a5c561934e089
+    </value>
+  </data>
+  <data name="PowerWayOfZenArcheryHailOfArrows" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>../Resources/Powers/PowerWayOfZenArcheryHailOfArrows.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral,
       PublicKeyToken=b77a5c561934e089
     </value>
   </data>
