@@ -5,6 +5,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using SolastaUnfinishedBusiness.CustomUI;
 using SolastaUnfinishedBusiness.Models;
+using static SolastaUnfinishedBusiness.Models.Level20Context;
 
 namespace SolastaUnfinishedBusiness.Patches;
 
@@ -64,8 +65,25 @@ public static class ReactionRequestCastSpellPatcher
             }
 
             var spellLevel = rulesetEffectSpell.SpellDefinition.SpellLevel;
-            var selected =
-                MulticlassGameUi.AddAvailableSubLevels(optionsAvailability, hero, repertoire, spellLevel);
+            var hasMasteryUse = WizardSpellMastery.IsMasteredSpell(
+                repertoire,
+                rulesetEffectSpell.SpellDefinition);
+
+            if (hasMasteryUse)
+            {
+                optionsAvailability.Add(0, true);
+            }
+
+            var selected = MulticlassGameUi.AddAvailableSubLevels(
+                optionsAvailability,
+                hero,
+                repertoire,
+                spellLevel);
+
+            if (hasMasteryUse)
+            {
+                selected = 0;
+            }
 
             if (selected >= 0)
             {

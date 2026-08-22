@@ -2448,6 +2448,9 @@ public static class RulesetCharacterPatcher
             //PATCH: support for 2024 Smite spells
             Tabletop2024Context.UpdatePaladinSmite(hero);
 
+            //PATCH: merge the old level-17 Action Surge override into the base power
+            Level20Context.MigrateLegacyActionSurge(hero);
+
             //PATCH: fix scenarios where hero doesn't have an instance of a usable power
             var featureDefinitionPowers = hero.ActiveFeatures
                 .SelectMany(k => k.Value)

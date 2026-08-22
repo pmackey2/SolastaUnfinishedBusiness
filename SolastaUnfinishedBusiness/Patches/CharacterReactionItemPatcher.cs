@@ -170,6 +170,11 @@ public static class CharacterReactionItemPatcher
                     instance.BindSmiteSlot(spellRepertoire, slotLevel, text, interactable, subitemSelected);
                     break;
                 default:
+                    if (slotLevel == 0)
+                    {
+                        text = "Action/&ActionTypeFreeOnceTitle";
+                    }
+
                     instance.Bind(spellRepertoire, slotLevel, text, interactable, subitemSelected);
                     break;
             }

@@ -28,6 +28,8 @@ public class ModifyPowerPoolAmount : IModifyPowerPoolAmount
                     AttributeDefinitions.TagEffect, Attribute, out var activeCondition)
                     ? activeCondition.Amount
                     : 0),
+            PowerPoolBonusCalculationType.ActionSurgeLevel17 =>
+                character.GetClassLevel(Attribute) >= 17 ? 1 : 0,
             PowerPoolBonusCalculationType.SecondWind2024 => GetSecondWindUsages(),
             PowerPoolBonusCalculationType.Wildshape2024 => GetWildshapeUsages(),
             _ => Value
@@ -83,6 +85,7 @@ public enum PowerPoolBonusCalculationType
     Attribute,
     AttributeModifier,
     ConditionAmount,
+    ActionSurgeLevel17,
     SecondWind2024,
     Wildshape2024
 }

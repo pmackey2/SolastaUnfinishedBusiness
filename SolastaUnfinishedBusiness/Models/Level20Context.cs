@@ -378,28 +378,77 @@ internal static class Level20Context
         var actionSurgeOncePerTurn = ValidatorsValidatePowerUse.HasNoneOfConditions(
             DatabaseHelper.ConditionDefinitions.ConditionSurged.Name);
 
-        PowerFighterActionSurge.AddCustomSubFeatures(actionSurgeOncePerTurn);
+        PowerFighterActionSurge.AddCustomSubFeatures(
+            HasModifiedUses.Marker,
+            actionSurgeOncePerTurn,
+            new ModifyPowerPoolAmount
+            {
+                PowerPool = PowerFighterActionSurge,
+                Type = PowerPoolBonusCalculationType.ActionSurgeLevel17,
+                Attribute = FighterClass
+            });
 
         // Keep the old definition registered so existing saves can still deserialize it,
         // but no longer grant, show, or treat it as an override of the original power.
-        FeatureDefinitionPowerBuilder
+        LegacyPowerFighterActionSurge2 = FeatureDefinitionPowerBuilder
             .Create(PowerFighterActionSurge, "PowerFighterActionSurge2")
-            .SetUsesFixed(ActivationTime.NoCost, RechargeRate.ShortRest, 1, 2)
+            .SetUsesFixed(ActivationTime.NoCost, RechargeRate.None, 1, 2)
             .AddCustomSubFeatures(actionSurgeOncePerTurn, ModifyPowerVisibility.Hidden)
             .AddToDB();
 
-        var powerUseModifierFighterActionSurge = FeatureDefinitionPowerUseModifierBuilder
+        PowerUseModifierFighterActionSurge = FeatureDefinitionPowerUseModifierBuilder
             .Create("PowerUseModifierFighterActionSurge")
             .SetGuiPresentation(PowerFighterActionSurge.GuiPresentation)
-            .SetFixedValue(PowerFighterActionSurge, 1)
+            // The extra use is calculated directly from Fighter level so existing heroes
+            // do not have to be respecced. Keep this as the level-up display/save marker.
+            .SetFixedValue(PowerFighterActionSurge, 0)
             .AddToDB();
 
         Fighter.FeatureUnlocks.AddRange(
-            new FeatureUnlockByLevel(powerUseModifierFighterActionSurge, 17),
+            new FeatureUnlockByLevel(PowerUseModifierFighterActionSurge, 17),
             new FeatureUnlockByLevel(AttributeModifierFighterIndomitableAdd1, 17),
             new FeatureUnlockByLevel(FeatureSetAbilityScoreChoice, 19),
             new FeatureUnlockByLevel(AttributeModifierFighterExtraAttack, 20)
         );
+    }
+
+    private static FeatureDefinitionPower LegacyPowerFighterActionSurge2 { get; set; }
+
+    private static FeatureDefinitionPowerUseModifier PowerUseModifierFighterActionSurge { get; set; }
+
+    internal static void MigrateLegacyActionSurge(RulesetCharacterHero hero)
+    {
+        if (hero.GetClassLevel(Fighter) < 17 || LegacyPowerFighterActionSurge2 == null)
+        {
+            return;
+        }
+
+        var legacyPower = hero.GetPowerFromDefinition(LegacyPowerFighterActionSurge2);
+        var actionSurge = hero.GetPowerFromDefinition(PowerFighterActionSurge);
+
+        if (legacyPower == null || actionSurge == null)
+        {
+            return;
+        }
+
+        // The old implementation stored one use on the base power and two on a
+        // separate override. Preserve how many of the intended two uses were spent.
+        actionSurge.remainingUses = Math.Min(
+            2,
+            Math.Max(0, actionSurge.remainingUses + legacyPower.remainingUses - 1));
+
+        hero.UsablePowers.Remove(legacyPower);
+
+        foreach (var features in hero.ActiveFeatures.Values)
+        {
+            for (var i = 0; i < features.Count; i++)
+            {
+                if (features[i] == LegacyPowerFighterActionSurge2)
+                {
+                    features[i] = PowerUseModifierFighterActionSurge;
+                }
+            }
+        }
     }
 
     private static void MonkLoad()
