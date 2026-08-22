@@ -19,7 +19,6 @@ using SolastaUnfinishedBusiness.Subclasses;
 using SolastaUnfinishedBusiness.Validators;
 using static RuleDefinitions;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.CharacterClassDefinitions;
-using static SolastaUnfinishedBusiness.Api.DatabaseHelper.ConditionDefinitions;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionAdditionalDamages;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionAttributeModifiers;
 using static SolastaUnfinishedBusiness.Api.DatabaseHelper.FeatureDefinitionCastSpells;
@@ -376,7 +375,8 @@ internal static class Level20Context
 
     private static void FighterLoad()
     {
-        var actionSurgeOncePerTurn = ValidatorsValidatePowerUse.HasNoneOfConditions(ConditionSurged.Name);
+        var actionSurgeOncePerTurn = ValidatorsValidatePowerUse.HasNoneOfConditions(
+            DatabaseHelper.ConditionDefinitions.ConditionSurged.Name);
 
         PowerFighterActionSurge.AddCustomSubFeatures(actionSurgeOncePerTurn);
 
