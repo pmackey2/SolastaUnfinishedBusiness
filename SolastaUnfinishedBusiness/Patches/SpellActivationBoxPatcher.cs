@@ -129,7 +129,7 @@ public static class SpellActivationBoxPatcher
             var background = badgeObject.GetComponent<Image>();
             background.sprite = spellActivationBox.background.sprite;
             background.type = Image.Type.Sliced;
-            background.color = new Color(0.20f, 0.10f, 0.32f, 0.96f);
+            background.color = new Color(0.14f, 0.12f, 0.18f, 0.92f);
             background.raycastTarget = false;
 
             var labelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
@@ -144,10 +144,10 @@ public static class SpellActivationBoxPatcher
             var label = labelObject.GetComponent<Text>();
             label.text = "M";
             label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            label.fontSize = 16;
-            label.fontStyle = FontStyle.Bold;
+            label.fontSize = 15;
+            label.fontStyle = FontStyle.Normal;
             label.alignment = TextAnchor.MiddleCenter;
-            label.color = new Color(1.00f, 0.84f, 0.35f);
+            label.color = new Color(0.86f, 0.87f, 0.88f, 0.96f);
             label.raycastTarget = false;
 
             return badge;
