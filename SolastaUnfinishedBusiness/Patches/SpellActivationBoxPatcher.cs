@@ -120,10 +120,10 @@ public static class SpellActivationBoxPatcher
             var badge = badgeObject.GetComponent<RectTransform>();
 
             badge.SetParent(spellActivationBox.transform, false);
-            badge.anchorMin = Vector2.one;
-            badge.anchorMax = Vector2.one;
-            badge.pivot = Vector2.one;
-            badge.anchoredPosition = new Vector2(-2, -2);
+            badge.anchorMin = Vector2.up;
+            badge.anchorMax = Vector2.up;
+            badge.pivot = Vector2.up;
+            badge.anchoredPosition = new Vector2(2, -2);
             badge.sizeDelta = new Vector2(22, 22);
 
             var background = badgeObject.GetComponent<Image>();
