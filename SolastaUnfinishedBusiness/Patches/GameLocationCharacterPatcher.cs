@@ -437,6 +437,15 @@ public static class GameLocationCharacterPatcher
             //PATCH: support grapple
             GrappleContext.ValidateActionAvailability(__instance, ref __result, actionId);
 
+            // Action Surge has its own dedicated action and does not consult the power's
+            // IValidatePowerUse subfeatures when the toolbar determines availability.
+            if (__result == ActionStatus.Available &&
+                actionId == Id.ActionSurge &&
+                !Level20Context.CanUseActionSurge(rulesetCharacter))
+            {
+                __result = ActionStatus.CannotPerform;
+            }
+
             //PATCH: support blinded don't allow AoO
             if (Main.Settings.BlindedConditionDontAllowAttackOfOpportunity &&
                 actionId == Id.AttackOpportunity &&

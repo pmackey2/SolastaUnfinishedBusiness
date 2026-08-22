@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using JetBrains.Annotations;
+using SolastaUnfinishedBusiness.Models;
 
 namespace SolastaUnfinishedBusiness.Patches;
 
@@ -27,6 +28,11 @@ public static class CharacterActionActionSurgePatcher
 
         private static IEnumerator Process(CharacterAction action)
         {
+            if (!Level20Context.CanUseActionSurge(action.ActingCharacter.RulesetCharacter))
+            {
+                yield break;
+            }
+
             var actionService = ServiceRepository.GetService<IGameLocationActionService>();
             var actionParams = action.ActionParams.Clone();
 

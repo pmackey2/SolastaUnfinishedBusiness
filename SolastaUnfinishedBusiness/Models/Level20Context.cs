@@ -378,11 +378,7 @@ internal static class Level20Context
         // The engine condition helper can miss ConditionSurged even while the condition is
         // present in ConditionsByCategory (and persisted in the save). Inspect the complete
         // active-condition collection so a fighter cannot spend both uses in the same turn.
-        var actionSurgeOncePerTurn = new ValidatorsValidatePowerUse(character =>
-            character.ConditionsByCategory
-                .SelectMany(category => category.Value)
-                .All(condition => condition.ConditionDefinition !=
-                                  DatabaseHelper.ConditionDefinitions.ConditionSurged));
+        var actionSurgeOncePerTurn = new ValidatorsValidatePowerUse(CanUseActionSurge);
 
         PowerFighterActionSurge.AddCustomSubFeatures(
             HasModifiedUses.Marker,
@@ -416,6 +412,14 @@ internal static class Level20Context
             new FeatureUnlockByLevel(FeatureSetAbilityScoreChoice, 19),
             new FeatureUnlockByLevel(AttributeModifierFighterExtraAttack, 20)
         );
+    }
+
+    internal static bool CanUseActionSurge(RulesetCharacter character)
+    {
+        return character.ConditionsByCategory
+            .SelectMany(category => category.Value)
+            .All(condition => condition.ConditionDefinition.Name !=
+                              DatabaseHelper.ConditionDefinitions.ConditionSurged.Name);
     }
 
     private static FeatureDefinitionPower LegacyPowerFighterActionSurge2 { get; set; }
