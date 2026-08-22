@@ -1,3 +1,15 @@
+# Custom Version Notice
+
+This repository contains a custom version of **Solasta Unfinished Business**, based on version `1.5.97.127`. It includes the following changes made for this build:
+
+* **Way of Zen Archery — Hail of Arrows:** targets up to four visible enemies within 120 feet instead of using a cone, with a new icon and updated description.
+* **Mordenkainen's Faithful Hound:** new spell and portrait artwork, automatic attacks at the start of the caster's turn, 2024-style Dexterity save and Force damage, 30-foot Truesight, and the ability to move the hound using a main action.
+* **Fighter — Action Surge:** the level-17 improvement now appears as one Action Surge button with two uses, prevents both uses being spent in the same turn, and migrates existing characters from the old separate-power implementation.
+* **Wizard — Spell Mastery:** corrected free casting for mastered spells affected by effect-level bonuses, including Shock Arcanist Magic Missile.
+* **Spell Mastery interface:** mastered spells have a subtle `M` badge in the casting list. Reaction spells such as Shield offer a properly sized **Free** choice at their base level, show only paid upcast levels, and record Spell Mastery use in the tactical log.
+
+---
+
 # Solasta Unfinished Business
 
 This is a [collection of work](https://github.com/EnderWiggin/SolastaUnfinishedBusiness/wiki) from the Solasta modding community. It includes multiclass, feats, classes, subclasses, items, crafting recipes, gameplay options, UI improvements, and more. The general philosophy is everything is optional to enable, so you can install the mod and then enable the pieces you want. There are some minor bug fixes that are enabled by default.
