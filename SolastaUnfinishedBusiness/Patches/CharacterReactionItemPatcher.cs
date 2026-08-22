@@ -173,6 +173,8 @@ public static class CharacterReactionItemPatcher
                     if (slotLevel == 0)
                     {
                         text = "Action/&ActionTypeFreeOnceTitle";
+                        instance.toggle.GetComponent<RectTransform>()
+                            .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 100);
                     }
 
                     instance.Bind(spellRepertoire, slotLevel, text, interactable, subitemSelected);
