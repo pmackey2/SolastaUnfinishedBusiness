@@ -130,7 +130,15 @@ public static class SpellActivationBoxPatcher
             background.sprite = spellActivationBox.background.sprite;
             background.type = Image.Type.Sliced;
             background.color = new Color(0.14f, 0.12f, 0.18f, 0.92f);
-            background.raycastTarget = false;
+            background.raycastTarget = true;
+
+            var tooltip = badgeObject.AddComponent<GuiTooltip>();
+            tooltip.Disabled = false;
+            tooltip.TooltipClass = GuiManager.DefaultTooltipClass;
+            tooltip.Content = "Screen/&SpellMasteryBadgeDescription";
+            tooltip.AnchorMode = TooltipDefinitions.AnchorMode.LEFT_CENTER;
+            tooltip.Context = null;
+            tooltip.DataProvider = null;
 
             var labelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
             var labelTransform = labelObject.GetComponent<RectTransform>();

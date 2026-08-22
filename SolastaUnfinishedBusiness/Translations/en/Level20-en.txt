@@ -165,5 +165,6 @@ Rules/&DamagePureDescription=Imperceptible vibrations that disintegrate the vict
 Rules/&DamagePureTitle=Pure
 Screen/&SignatureSpellsExtraSpellDescription=This Signature spell is always prepared and, once per long rest, it doesn't consume a spell slot when cast at level.
 Screen/&SignatureSpellsExtraSpellTitle=Signature
+Screen/&SpellMasteryBadgeDescription=Casting this spell at its base level with Spell Mastery does not consume a spell slot. Click the spell to upcast it with a higher-level spell slot; upcasting consumes the selected slot.
 Screen/&SpellMasteryExtraSpellDescription=This Mastery spell is always prepared and doesn't consume a spell slot when cast at level.
 Screen/&SpellMasteryExtraSpellTitle=Mastery
