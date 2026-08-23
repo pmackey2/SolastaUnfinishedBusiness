@@ -10,12 +10,39 @@ using SolastaUnfinishedBusiness.Api.Helpers;
 using SolastaUnfinishedBusiness.Behaviors;
 using SolastaUnfinishedBusiness.Behaviors.Specific;
 using SolastaUnfinishedBusiness.Models;
+using static SolastaUnfinishedBusiness.Models.Level20Context;
 
 namespace SolastaUnfinishedBusiness.Patches;
 
 [UsedImplicitly]
 public static class SpellSelectionPanelPatcher
 {
+    [HarmonyPatch(typeof(SpellRepertoireLine), nameof(SpellRepertoireLine.Bind))]
+    [SuppressMessage("Minor Code Smell", "S101:Types should be named in PascalCase", Justification = "Patch")]
+    [UsedImplicitly]
+    public static class SpellRepertoireLineBind_Patch
+    {
+        [NotNull]
+        [UsedImplicitly]
+        public static IEnumerable<CodeInstruction> Transpiler([NotNull] IEnumerable<CodeInstruction> instructions)
+        {
+            // Mastered wizard spells are stored separately from PreparedSpells. Add them to the
+            // display-only prepared list so the combat panel can sort them into main/bonus actions.
+            var getPreparedSpells = typeof(RulesetSpellRepertoire)
+                .GetProperty(nameof(RulesetSpellRepertoire.PreparedSpells))!
+                .GetGetMethod();
+            var getPreparedSpellsForBattle = new Func<
+                RulesetSpellRepertoire,
+                List<SpellDefinition>
+            >(WizardSpellMastery.GetPreparedSpellsForBattle).Method;
+
+            return instructions.ReplaceCalls(
+                getPreparedSpells,
+                "SpellRepertoireLine.Bind",
+                new CodeInstruction(OpCodes.Call, getPreparedSpellsForBattle));
+        }
+    }
+
     [HarmonyPatch(typeof(SpellSelectionPanel), nameof(SpellSelectionPanel.Bind))]
     [SuppressMessage("Minor Code Smell", "S101:Types should be named in PascalCase", Justification = "Patch")]
     [UsedImplicitly]

@@ -773,6 +773,18 @@ internal static class Level20Context
                    masteredSpells.Contains(spell);
         }
 
+        internal static List<SpellDefinition> GetPreparedSpellsForBattle(RulesetSpellRepertoire repertoire)
+        {
+            if (Gui.Battle == null ||
+                !repertoire.ExtraSpellsByTag.TryGetValue(Mastery, out var masteredSpells) ||
+                masteredSpells.Count == 0)
+            {
+                return repertoire.PreparedSpells;
+            }
+
+            return [.. repertoire.PreparedSpells.Concat(masteredSpells).Distinct()];
+        }
+
         internal static FeatureDefinition BuildWizardSpellMastery()
         {
             _ = ConditionDefinitionBuilder
