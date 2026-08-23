@@ -820,7 +820,14 @@ public static class CharacterActionMagicEffectPatcher
             // Wait for cast animation to finish
             if (__instance.needToWaitCastAnimation)
             {
-                if (!__instance.isResultingActionSpendPowerWithMotionForm)
+                // Eldritch Blast resolves each beam before reaching this point. With multiple
+                // beams, its animation-end event has already fired, so waiting for it again
+                // stalls the action until the event system times out.
+                var eldritchBlastBeamsAlreadyResolved =
+                    baseDefinition == SpellDefinitions.EldritchBlast && targets.Count > 1;
+
+                if (!__instance.isResultingActionSpendPowerWithMotionForm &&
+                    !eldritchBlastBeamsAlreadyResolved)
                 {
                     yield return actingCharacter.EventSystem.WaitForEvent(
                         GameLocationCharacterEventSystem.Event.MagicEffectAnimationEnd);
