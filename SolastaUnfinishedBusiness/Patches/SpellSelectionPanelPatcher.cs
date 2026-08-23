@@ -26,20 +26,20 @@ public static class SpellSelectionPanelPatcher
         [UsedImplicitly]
         public static IEnumerable<CodeInstruction> Transpiler([NotNull] IEnumerable<CodeInstruction> instructions)
         {
-            // Mastered wizard spells are stored separately from PreparedSpells. Add them to the
+            // Spell Mastery and Signature Spells are stored separately from PreparedSpells. Add them to the
             // display-only prepared list so the combat panel can sort them into main/bonus actions.
             var getPreparedSpells = typeof(RulesetSpellRepertoire)
                 .GetProperty(nameof(RulesetSpellRepertoire.PreparedSpells))!
                 .GetGetMethod();
-            var getPreparedSpellsForBattle = new Func<
+            var getAlwaysPreparedSpellsForBattle = new Func<
                 RulesetSpellRepertoire,
                 List<SpellDefinition>
-            >(WizardSpellMastery.GetPreparedSpellsForBattle).Method;
+            >(WizardSpellMastery.GetAlwaysPreparedSpellsForBattle).Method;
 
             return instructions.ReplaceCalls(
                 getPreparedSpells,
                 "SpellRepertoireLine.Bind",
-                new CodeInstruction(OpCodes.Call, getPreparedSpellsForBattle));
+                new CodeInstruction(OpCodes.Call, getAlwaysPreparedSpellsForBattle));
         }
     }
 

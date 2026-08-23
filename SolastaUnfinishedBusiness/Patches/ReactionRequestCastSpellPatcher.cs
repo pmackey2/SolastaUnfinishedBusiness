@@ -68,8 +68,13 @@ public static class ReactionRequestCastSpellPatcher
             var hasMasteryUse = WizardSpellMastery.IsMasteredSpell(
                 repertoire,
                 rulesetEffectSpell.SpellDefinition);
+            var hasSignatureUse = WizardSignatureSpells.HasAvailableFreeUse(
+                hero,
+                repertoire,
+                rulesetEffectSpell.SpellDefinition);
+            var hasFreeUse = hasMasteryUse || hasSignatureUse;
 
-            if (hasMasteryUse)
+            if (hasFreeUse)
             {
                 optionsAvailability.Add(0, true);
             }
@@ -80,7 +85,7 @@ public static class ReactionRequestCastSpellPatcher
                 repertoire,
                 hasMasteryUse ? spellLevel + 1 : spellLevel);
 
-            if (hasMasteryUse)
+            if (hasFreeUse)
             {
                 selected = 0;
             }
@@ -114,13 +119,26 @@ public static class ReactionRequestCastSpellPatcher
             }
 
             var selectedSlotLevel = __instance.SubOptionsAvailability.Keys.ToArray()[option];
+            var isSignatureSpell = WizardSignatureSpells.IsSignatureSpell(
+                spellEffect.SpellRepertoire,
+                spellEffect.SpellDefinition);
+
+            if (isSignatureSpell)
+            {
+                WizardSignatureSpells.SetUseFreeCast(spellEffect, selectedSlotLevel == 0);
+            }
 
             // Zero is only the UI key for the Free row. Cast the spell at its real
             // base level so effect advancement and spell accounting remain correct.
             if (selectedSlotLevel == 0 &&
-                WizardSpellMastery.IsMasteredSpell(
-                    spellEffect.SpellRepertoire,
-                    spellEffect.SpellDefinition))
+                (WizardSpellMastery.IsMasteredSpell(
+                     spellEffect.SpellRepertoire,
+                     spellEffect.SpellDefinition) ||
+                 WizardSignatureSpells.HasAvailableFreeUse(
+                     hero,
+                     spellEffect.SpellRepertoire,
+                     spellEffect.SpellDefinition) &&
+                 WizardSignatureSpells.IsFreeCastSelected(spellEffect)))
             {
                 selectedSlotLevel = spellEffect.SpellDefinition.SpellLevel;
             }
@@ -156,9 +174,14 @@ public static class ReactionRequestCastSpellPatcher
 
             if (__instance.SubOptionsAvailability.ContainsKey(0) &&
                 selectedSlotLevel == spellEffect.SpellDefinition.SpellLevel &&
-                WizardSpellMastery.IsMasteredSpell(
-                    spellEffect.SpellRepertoire,
-                    spellEffect.SpellDefinition))
+                (WizardSpellMastery.IsMasteredSpell(
+                     spellEffect.SpellRepertoire,
+                     spellEffect.SpellDefinition) ||
+                 WizardSignatureSpells.HasAvailableFreeUse(
+                     hero,
+                     spellEffect.SpellRepertoire,
+                     spellEffect.SpellDefinition) &&
+                 WizardSignatureSpells.IsFreeCastSelected(spellEffect)))
             {
                 selectedSlotLevel = 0;
             }

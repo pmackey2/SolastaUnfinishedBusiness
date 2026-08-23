@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using JetBrains.Annotations;
 using SolastaUnfinishedBusiness.Api;
@@ -773,16 +774,27 @@ internal static class Level20Context
                    masteredSpells.Contains(spell);
         }
 
-        internal static List<SpellDefinition> GetPreparedSpellsForBattle(RulesetSpellRepertoire repertoire)
+        internal static List<SpellDefinition> GetAlwaysPreparedSpellsForBattle(RulesetSpellRepertoire repertoire)
         {
-            if (Gui.Battle == null ||
-                !repertoire.ExtraSpellsByTag.TryGetValue(Mastery, out var masteredSpells) ||
-                masteredSpells.Count == 0)
+            if (Gui.Battle == null)
             {
                 return repertoire.PreparedSpells;
             }
 
-            return [.. repertoire.PreparedSpells.Concat(masteredSpells).Distinct()];
+            var alwaysPreparedSpells = repertoire.PreparedSpells.ToList();
+
+            if (repertoire.ExtraSpellsByTag.TryGetValue(Mastery, out var masteredSpells))
+            {
+                alwaysPreparedSpells.AddRange(masteredSpells);
+            }
+
+            if (repertoire.ExtraSpellsByTag.TryGetValue(
+                    WizardSignatureSpells.Signature, out var signatureSpells))
+            {
+                alwaysPreparedSpells.AddRange(signatureSpells);
+            }
+
+            return [.. alwaysPreparedSpells.Distinct()];
         }
 
         internal static FeatureDefinition BuildWizardSpellMastery()
@@ -861,7 +873,14 @@ internal static class Level20Context
 
     internal static class WizardSignatureSpells
     {
-        private const string Signature = "SignatureSpells";
+        internal const string Signature = "SignatureSpells";
+
+        private sealed class CastSelection(bool useFree)
+        {
+            internal bool UseFree { get; } = useFree;
+        }
+
+        private static readonly ConditionalWeakTable<RulesetEffectSpell, CastSelection> CastSelections = new();
 
         internal static readonly FeatureDefinitionPower PowerSignatureSpells = FeatureDefinitionPowerBuilder
             .Create("PowerWizardSignatureSpells")
@@ -908,6 +927,45 @@ internal static class Level20Context
                 spell.SpellLevel is not 3;
         }
 
+        internal static bool IsSignatureSpell(RulesetSpellRepertoire repertoire, SpellDefinition spell)
+        {
+            return repertoire.ExtraSpellsByTag.TryGetValue(Signature, out var signatureSpells) &&
+                   signatureSpells.Contains(spell);
+        }
+
+        internal static bool HasAvailableFreeUse(
+            RulesetCharacter caster,
+            RulesetSpellRepertoire repertoire,
+            SpellDefinition spell)
+        {
+            if (!repertoire.ExtraSpellsByTag.TryGetValue(Signature, out var signatureSpells))
+            {
+                return false;
+            }
+
+            var index = signatureSpells.IndexOf(spell);
+
+            if (index < 0)
+            {
+                return false;
+            }
+
+            var usablePower = PowerProvider.Get(PowerSignatureSpells, caster);
+
+            return (usablePower.remainingUses & (1 << index)) != 0;
+        }
+
+        internal static void SetUseFreeCast(RulesetEffectSpell activeSpell, bool useFree)
+        {
+            CastSelections.Remove(activeSpell);
+            CastSelections.Add(activeSpell, new CastSelection(useFree));
+        }
+
+        internal static bool IsFreeCastSelected(RulesetEffectSpell activeSpell)
+        {
+            return !CastSelections.TryGetValue(activeSpell, out var selection) || selection.UseFree;
+        }
+
         internal static bool ShouldConsumeSlot(RulesetCharacter caster, RulesetEffectSpell activeSpell)
         {
             if (activeSpell.SlotLevel != activeSpell.SpellDefinition.SpellLevel)
@@ -921,31 +979,35 @@ internal static class Level20Context
                 return true;
             }
 
-            var usablePower = PowerProvider.Get(PowerSignatureSpells, caster);
+            if (CastSelections.TryGetValue(activeSpell, out var selection))
+            {
+                CastSelections.Remove(activeSpell);
 
-            if (usablePower.remainingUses == 0)
+                if (!selection.UseFree)
+                {
+                    return true;
+                }
+            }
+
+            var index = signaturePreparedSpells.IndexOf(activeSpell.SpellDefinition);
+
+            if (index < 0)
             {
                 return true;
             }
 
-            for (var i = 0; i < signaturePreparedSpells.Count; i++)
+            var usablePower = PowerProvider.Get(PowerSignatureSpells, caster);
+            var useMask = 1 << index;
+
+            if ((usablePower.remainingUses & useMask) == 0)
             {
-                if (signaturePreparedSpells[i] == activeSpell.SpellDefinition)
-                {
-                    switch (i)
-                    {
-                        case 0 when usablePower.remainingUses == 2:
-                        case 1 when usablePower.remainingUses == 1:
-                            return true;
-                        default:
-                            usablePower.remainingUses -= i == 0 ? 1 : 2;
-                            caster.LogCharacterUsedFeature(PowerSignatureSpells);
-                            return false;
-                    }
-                }
+                return true;
             }
 
-            return true;
+            usablePower.remainingUses &= ~useMask;
+            caster.LogCharacterUsedFeature(PowerSignatureSpells);
+
+            return false;
         }
 
         internal static FeatureDefinition BuildWizardSignatureSpells()

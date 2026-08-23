@@ -663,10 +663,32 @@ public static class RulesetCharacterPatcher
             ref int __result,
             ref RulesetSpellRepertoire matchingRepertoire)
         {
+            if (matchingRepertoire != null)
+            {
+                return;
+            }
+
+            // Spell Mastery is unlimited at base level. Signature Spells are available at
+            // base level while that individual spell's once-per-rest use remains.
+            foreach (var repertoire in __instance.SpellRepertoires)
+            {
+                if (!Level20Context.WizardSpellMastery.IsMasteredSpell(repertoire, spellDefinitionToCast) &&
+                    !Level20Context.WizardSignatureSpells.HasAvailableFreeUse(
+                        __instance, repertoire, spellDefinitionToCast))
+                {
+                    continue;
+                }
+
+                matchingRepertoire = repertoire;
+                __result = spellDefinitionToCast.SpellLevel;
+
+                return;
+            }
+
             //PATCH: game doesn't consider cantrips gained from BonusCantrips feature
             //because of __instance issue Inventor can't use Light cantrip from quick-cast button on UI
             //__instance patch tries to find requested cantrip in repertoire's ExtraSpellsByTag
-            if (spellDefinitionToCast.spellLevel != 0 || matchingRepertoire != null)
+            if (spellDefinitionToCast.spellLevel != 0)
             {
                 return;
             }
@@ -679,6 +701,33 @@ public static class RulesetCharacterPatcher
                 __result = 0;
 
                 break;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(RulesetCharacter), nameof(RulesetCharacter.EnumerateUsableSpells))]
+    [SuppressMessage("Minor Code Smell", "S101:Types should be named in PascalCase", Justification = "Patch")]
+    [UsedImplicitly]
+    public static class EnumerateUsableSpells_Patch
+    {
+        [UsedImplicitly]
+        public static void Postfix(RulesetCharacter __instance)
+        {
+            foreach (var repertoire in __instance.SpellRepertoires)
+            {
+                foreach (var spellsByTag in repertoire.ExtraSpellsByTag)
+                {
+                    foreach (var spell in spellsByTag.Value)
+                    {
+                        if ((Level20Context.WizardSpellMastery.IsMasteredSpell(repertoire, spell) ||
+                             Level20Context.WizardSignatureSpells.HasAvailableFreeUse(
+                                 __instance, repertoire, spell)) &&
+                            !__instance.UsableSpells.Contains(spell))
+                        {
+                            __instance.UsableSpells.Add(spell);
+                        }
+                    }
+                }
             }
         }
     }

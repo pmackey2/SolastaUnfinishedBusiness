@@ -21,7 +21,7 @@ public static class SpellActivationBoxPatcher
     [UsedImplicitly]
     public static class BindSpell_Patch
     {
-        private const string SpellMasteryBadgeName = "UBSpellMasteryBadge";
+        private const string SpecialSpellBadgeName = "UBSpecialSpellBadge";
 
         private static bool UniqueLevelSlots(
             FeatureDefinitionCastSpell featureDefinitionCastSpell,
@@ -71,6 +71,20 @@ public static class SpellActivationBoxPatcher
             {
                 repertoire.GetSlotsNumber(spellLevel, out remaining, out max);
             }
+
+            var spellDefinition = spellActivationBox.guiSpellDefinition?.SpellDefinition;
+
+            if (spellDefinition == null || spellLevel != spellDefinition.SpellLevel ||
+                (!WizardSpellMastery.IsMasteredSpell(repertoire, spellDefinition) &&
+                 !WizardSignatureSpells.HasAvailableFreeUse(caster, repertoire, spellDefinition)))
+            {
+                return;
+            }
+
+            // Keep the base-level spell selectable even with no slots. Spell Mastery is
+            // unlimited; Signature Spells remain selectable while their own free use exists.
+            remaining = Math.Max(remaining, 1);
+            max = Math.Max(max, 1);
         }
 
         [UsedImplicitly]
@@ -99,35 +113,46 @@ public static class SpellActivationBoxPatcher
             RulesetSpellRepertoire spellRepertoire,
             SpellDefinition spellDefinition)
         {
-            var showBadge = WizardSpellMastery.IsMasteredSpell(spellRepertoire, spellDefinition);
-            var badge = __instance.transform.Find(SpellMasteryBadgeName) as RectTransform;
+            var showMasteryBadge = WizardSpellMastery.IsMasteredSpell(spellRepertoire, spellDefinition);
+            var showSignatureBadge = WizardSignatureSpells.IsSignatureSpell(spellRepertoire, spellDefinition);
+            var showBadge = showMasteryBadge || showSignatureBadge;
+            var badge = __instance.transform.Find(SpecialSpellBadgeName) as RectTransform;
 
             if (badge == null && showBadge)
             {
-                badge = BuildSpellMasteryBadge(__instance);
+                badge = BuildSpecialSpellBadge(__instance);
             }
 
             if (badge != null)
             {
                 badge.gameObject.SetActive(showBadge);
                 badge.SetAsLastSibling();
+
+                var label = badge.Find("Label")?.GetComponent<Text>();
+
+                if (label != null)
+                {
+                    label.text = showMasteryBadge ? "M" : "S";
+                }
             }
 
             if (showBadge)
             {
-                var masteryDescription = Gui.Localize("Screen/&SpellMasteryBadgeDescription");
+                var specialSpellDescription = Gui.Localize(showMasteryBadge
+                    ? "Screen/&SpellMasteryBadgeDescription"
+                    : "Screen/&SignatureSpellsBadgeDescription");
                 var spellDescription = Gui.Localize(__instance.tooltip.Content);
 
-                if (!spellDescription.StartsWith(masteryDescription, StringComparison.Ordinal))
+                if (!spellDescription.StartsWith(specialSpellDescription, StringComparison.Ordinal))
                 {
-                    __instance.tooltip.Content = $"{masteryDescription}\n\n{spellDescription}";
+                    __instance.tooltip.Content = $"{specialSpellDescription}\n\n{spellDescription}";
                 }
             }
         }
 
-        private static RectTransform BuildSpellMasteryBadge(SpellActivationBox spellActivationBox)
+        private static RectTransform BuildSpecialSpellBadge(SpellActivationBox spellActivationBox)
         {
-            var badgeObject = new GameObject(SpellMasteryBadgeName, typeof(RectTransform), typeof(Image));
+            var badgeObject = new GameObject(SpecialSpellBadgeName, typeof(RectTransform), typeof(Image));
             var badge = badgeObject.GetComponent<RectTransform>();
 
             badge.SetParent(spellActivationBox.transform, false);
