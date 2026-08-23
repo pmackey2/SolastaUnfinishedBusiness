@@ -17,6 +17,7 @@ using SolastaUnfinishedBusiness.Spells;
 using TA;
 using UnityEngine;
 using static RuleDefinitions;
+using static SolastaUnfinishedBusiness.Api.DatabaseHelper.SpellDefinitions;
 using static SolastaUnfinishedBusiness.Api.GameExtensions.GameLocationBattleExtensions;
 using Coroutine = TA.Coroutine;
 
@@ -824,7 +825,7 @@ public static class CharacterActionMagicEffectPatcher
                 // beams, its animation-end event has already fired, so waiting for it again
                 // stalls the action until the event system times out.
                 var eldritchBlastBeamsAlreadyResolved =
-                    baseDefinition == SpellDefinitions.EldritchBlast && targets.Count > 1;
+                    baseDefinition == EldritchBlast && targets.Count > 1;
 
                 if (!__instance.isResultingActionSpendPowerWithMotionForm &&
                     !eldritchBlastBeamsAlreadyResolved)
